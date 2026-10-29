@@ -17,3 +17,5 @@ One partner creates the remote repository and pushes the project. The other part
 
 ## Demo tip
 `john` is dated 5 days ago, `sara` shares that date, `emma` is 2 days ago, and `alex` is today. Search after john, same day as john, never signed in, and today to demonstrate correct results. Register a new user to show live inserts and sign-in updates.
+
+This project demonstrates user registration, secure login, database searches, and GitHub collaboration.
