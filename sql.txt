@@ -1,0 +1,41 @@
+CREATE DATABASE IF NOT EXISTS web_app;
+USE web_app;
+CREATE TABLE IF NOT EXISTS Users (
+ username VARCHAR(50) PRIMARY KEY,
+ password VARCHAR(255) NOT NULL,
+ firstname VARCHAR(50) NOT NULL,
+ lastname VARCHAR(50) NOT NULL,
+ salary DECIMAL(12,2) NOT NULL,
+ age INT NOT NULL,
+ registerday DATE NOT NULL DEFAULT (CURRENT_DATE),
+ signintime DATETIME NULL
+);
+-- DEMO DATA (run before testing the searches)
+-- Optional test data: bcrypt hash for password 'password' (only use for demo records):
+INSERT IGNORE INTO Users(username,password,firstname,lastname,salary,age,registerday,signintime) VALUES
+('john','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','John','Smith',65000,30,DATE_SUB(CURDATE(),INTERVAL 5 DAY),NULL),
+('emma','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','Emma','Jones',80000,27,DATE_SUB(CURDATE(),INTERVAL 2 DAY),NULL),
+('alex','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','Alex','Brown',45000,22,CURDATE(),NULL),
+('sara','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','Sara','Lee',95000,35,DATE_SUB(CURDATE(),INTERVAL 5 DAY),NULL);
+
+-- REQUIRED SQL STATEMENTS (search examples)
+-- Registration (the backend supplies a bcrypt hash, never plain text):
+-- INSERT INTO Users(username,password,firstname,lastname,salary,age,registerday) VALUES(?,?,?,?,?,?,CURDATE());
+-- Login: SELECT * FROM Users WHERE username=?;
+-- After password verification: UPDATE Users SET signintime=NOW() WHERE username=?;
+-- 3. Search first and/or last name:
+SELECT username,firstname,lastname,salary,age,registerday,signintime FROM Users WHERE firstname LIKE '%Jo%' AND lastname LIKE '%Sm%';
+-- 4. Search user ID:
+SELECT username,firstname,lastname,salary,age,registerday,signintime FROM Users WHERE username='john';
+-- 5. Salary range:
+SELECT username,firstname,lastname,salary,age,registerday,signintime FROM Users WHERE salary BETWEEN 40000 AND 90000;
+-- 6. Age range:
+SELECT username,firstname,lastname,salary,age,registerday,signintime FROM Users WHERE age BETWEEN 20 AND 40;
+-- 7. Registered after john (strictly later calendar day):
+SELECT u.* FROM Users u JOIN Users ref ON ref.username='john' WHERE u.registerday>ref.registerday;
+-- 8. Never signed in:
+SELECT username,firstname,lastname,salary,age,registerday,signintime FROM Users WHERE signintime IS NULL;
+-- 9. Registered same day as john:
+SELECT u.* FROM Users u JOIN Users ref ON ref.username='john' WHERE u.registerday=ref.registerday;
+-- 10. Registered today:
+SELECT username,firstname,lastname,salary,age,registerday,signintime FROM Users WHERE registerday=CURDATE();

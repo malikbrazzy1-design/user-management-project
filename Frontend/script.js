@@ -1,0 +1,10 @@
+const API='http://localhost:5050/api';const $=id=>document.getElementById(id);
+async function request(path,options){const r=await fetch(API+path,options);const data=await r.json();if(!r.ok)throw Error(data.error||'Request failed');return data}
+function body(form){return Object.fromEntries(new FormData(form).entries())}
+function opts(obj){return {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)}}
+$('register').onsubmit=async e=>{e.preventDefault();try{const d=await request('/register',opts(body(e.target)));$('status').textContent=d.message;e.target.reset()}catch(err){$('status').textContent=err.message}};
+$('login').onsubmit=async e=>{e.preventDefault();try{const d=await request('/login',opts(body(e.target)));$('welcome').textContent=`Welcome, ${d.user.firstname}!`;$('status').textContent=d.message;e.target.reset()}catch(err){$('status').textContent=err.message}};
+function field(name,placeholder){return `<input name="${name}" placeholder="${placeholder}" aria-label="${placeholder}">`}
+function update(){const t=$('type').value;$('fields').innerHTML=t==='name'?field('firstname','First name (optional)')+field('lastname','Last name (optional)'):['userid','after','same'].includes(t)?field('userid',t==='userid'?'Enter user ID':'User ID (default: john)'):['salary','age'].includes(t)?field('min','Minimum')+field('max','Maximum'):'No additional fields needed'}
+$('type').onchange=update;update();
+$('search').onclick=async()=>{const t=$('type').value;const params=new URLSearchParams();$('fields').querySelectorAll('input').forEach(x=>{if(x.value.trim())params.set(x.name,x.value.trim())});try{const data=await request('/search/'+t+'?'+params);$('results').replaceChildren();data.forEach(u=>{const tr=document.createElement('tr');[u.username,u.firstname,u.lastname,u.salary,u.age,u.registerday,u.signintime||'Never'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});$('results').append(tr)});$('status').textContent=`Found ${data.length} user(s)`}catch(err){$('status').textContent=err.message}};
